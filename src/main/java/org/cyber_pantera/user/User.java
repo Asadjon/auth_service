@@ -25,7 +25,7 @@ public class User implements UserDetails {
     private String lastName;
     private String email;
     private String password;
-    private boolean enabled = true;
+    private boolean enabled;
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -38,21 +38,6 @@ public class User implements UserDetails {
     @Override
     public String getUsername() {
         return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
     }
 
     @Override
