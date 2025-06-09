@@ -1,4 +1,4 @@
-package org.cyber_pantera.user;
+package org.cyber_pantera.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

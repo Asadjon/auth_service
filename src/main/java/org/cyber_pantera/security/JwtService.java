@@ -1,4 +1,4 @@
-package org.cyber_pantera.jwt;
+package org.cyber_pantera.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

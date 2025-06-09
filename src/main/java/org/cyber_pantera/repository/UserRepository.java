@@ -1,5 +1,6 @@
-package org.cyber_pantera.user;
+package org.cyber_pantera.repository;
 
+import org.cyber_pantera.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

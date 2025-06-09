@@ -1,4 +1,4 @@
-package org.cyber_pantera.user;
+package org.cyber_pantera.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
