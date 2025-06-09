@@ -22,6 +22,6 @@ public class VerificationToken {
     private String token;
     private LocalDateTime expiryDate;
 
-    @OneToMany
+    @OneToOne
     private User user;
 }
