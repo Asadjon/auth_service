@@ -1,28 +1,34 @@
 package org.cyber_pantera.service;
 
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.cyber_pantera.dto.AuthRequest;
 import org.cyber_pantera.dto.AuthResponse;
 import org.cyber_pantera.dto.RegisterRequest;
+import org.cyber_pantera.dto.ResendVerificationRequest;
 import org.cyber_pantera.entity.User;
 import org.cyber_pantera.entity.VerificationToken;
+import org.cyber_pantera.mailing.AccountVerificationEmailContext;
+import org.cyber_pantera.mailing.EmailService;
 import org.cyber_pantera.repository.UserRepository;
-import org.cyber_pantera.repository.VerificationTokenRepository;
-import org.cyber_pantera.security.JwtService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepo;
-    private final VerificationTokenRepository tokenRepo;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final VerificationTokenService verificationTokenService;
+    private final EmailService emailService;
+
+    @Value("${base.url}")
+    private String baseUrl;
 
     @Transactional
     public String register(RegisterRequest request) {
@@ -41,29 +47,13 @@ public class AuthService {
 
         userRepo.save(user);
 
-        String token = UUID.randomUUID().toString();
-        VerificationToken verificationToken = VerificationToken.builder()
-                .token(token)
-                .user(user)
-                .expiryDate(LocalDateTime.now().plusHours(24))
-                .build();
-
-        tokenRepo.save(verificationToken);
-
-        System.out.println(verificationToken);
-        sendConfirmationEmail(user.getEmail(), token);
+        sendConfirmationEmail(user);
 
         return "Registration successful. Please check your email to confirm.";
     }
 
     public String confirmToken(String token) {
-        VerificationToken verificationToken = tokenRepo.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid token"));
-
-        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now()))
-            throw new RuntimeException("Token expired");
-
-        User user = verificationToken.getUser();
+        User user = verificationTokenService.checkToken(token);
         user.setEnabled(true);
         userRepo.save(user);
         return "Email confirmed successfully.";
@@ -83,7 +73,30 @@ public class AuthService {
         return new AuthResponse(token, user.getEmail(), user.getRole());
     }
 
-    private void sendConfirmationEmail(String toEmail, String token) {
-        // TODO write send confirmation request to user email codes
+    private void sendConfirmationEmail(User user) {
+        VerificationToken verificationToken = verificationTokenService.createToken(user);
+        AccountVerificationEmailContext context = new AccountVerificationEmailContext();
+        context.init(user);
+        context.setToken(verificationToken.getToken());
+        context.buildVerificationUrl(baseUrl, verificationToken.getToken());
+
+        try {
+            emailService.sendMail(context);
+        } catch (MessagingException e) {
+            log.error("Error sending email:{}", e.getMessage());
+            throw new RuntimeException("Email not sent", e);
+        }
+    }
+
+    public String resendConfirmationEmail(ResendVerificationRequest request) {
+        User user = userRepo.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.isEnabled())
+            throw new RuntimeException("Email already registered");
+
+        sendConfirmationEmail(user);
+
+        return "Confirmation email has been resent";
     }
 }
