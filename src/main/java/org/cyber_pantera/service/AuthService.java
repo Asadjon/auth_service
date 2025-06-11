@@ -3,10 +3,7 @@ package org.cyber_pantera.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.cyber_pantera.dto.AuthRequest;
-import org.cyber_pantera.dto.AuthResponse;
-import org.cyber_pantera.dto.RegisterRequest;
-import org.cyber_pantera.dto.ResendVerificationRequest;
+import org.cyber_pantera.dto.*;
 import org.cyber_pantera.entity.User;
 import org.cyber_pantera.entity.VerificationToken;
 import org.cyber_pantera.exception.EmailConfirmationException;
@@ -90,5 +87,20 @@ public class AuthService {
         sendConfirmationEmail(user);
 
         return "Confirmation email has been resent";
+    }
+
+    public ValidationTokenResponse validateToken(String jwtToken) {
+        var email = jwtService.extractUsername(jwtToken);
+        var user = userService.getUserByEmail(email);
+
+        if (!user.isEnabled())
+            throw new EmailConfirmationException("Email not confirmed");
+
+        return new ValidationTokenResponse(
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getRole()
+        );
     }
 }

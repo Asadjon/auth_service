@@ -1,5 +1,6 @@
 package org.cyber_pantera.handler;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import org.cyber_pantera.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,13 @@ public class AuthExceptionHandler {
     public ResponseEntity<?> emailNotSent(EmailConfirmationException e) {
         return ResponseEntity
                 .badRequest()
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<?> emailNotSent(ExpiredJwtException e) {
+        return ResponseEntity
+                .status(HttpStatus.GONE)
                 .body(e.getMessage());
     }
 }

@@ -32,21 +32,11 @@ public class JwtService {
     }
 
     public <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
-        Claims claims;
-        try {
-            claims = extractAllClaims(token);
-        } catch (ExpiredJwtException e) {
-            claims = e.getClaims();
-        }
-        return claimsResolver.apply(claims);
+        return claimsResolver.apply(extractAllClaims(token));
     }
 
     public String extractUsername(String token) {
         return extractClaims(token, Claims::getSubject);
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaims(token, Claims::getExpiration);
     }
 
     public String generateToken(UserDetails userDetails) {
@@ -65,15 +55,6 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
-    }
-
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
     }
 
     private Key getSignInKey() {

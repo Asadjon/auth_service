@@ -2,10 +2,7 @@ package org.cyber_pantera.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.cyber_pantera.dto.AuthRequest;
-import org.cyber_pantera.dto.AuthResponse;
-import org.cyber_pantera.dto.RegisterRequest;
-import org.cyber_pantera.dto.ResendVerificationRequest;
+import org.cyber_pantera.dto.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.cyber_pantera.service.AuthService;
@@ -35,5 +32,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @GetMapping("/validate")
+    public ResponseEntity<ValidationTokenResponse> validateToken(@RequestParam("token") String jwtToken) {
+        return ResponseEntity.ok(authService.validateToken(jwtToken));
     }
 }
