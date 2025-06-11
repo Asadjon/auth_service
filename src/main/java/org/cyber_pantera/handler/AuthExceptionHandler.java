@@ -11,6 +11,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class AuthExceptionHandler {
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> userNotFound(RuntimeException e) {
+        return ResponseEntity
+                .badRequest()
+                .body(e.getMessage());
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<?> userNotFound(UserNotFoundException e) {
         return ResponseEntity

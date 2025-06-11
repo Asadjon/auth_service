@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "verification_token")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,8 +21,7 @@ public class VerificationToken {
     private long id;
 
     private String token;
-    private LocalDateTime expiryDate;
 
-    @OneToOne
+    @ManyToOne
     private User user;
 }

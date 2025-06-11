@@ -38,4 +38,14 @@ public class AuthController {
     public ResponseEntity<ValidationTokenResponse> validateToken(@RequestParam("token") String jwtToken) {
         return ResponseEntity.ok(authService.validateToken(jwtToken));
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(authService.forgotPassword(request));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(authService.resetPassword(request));
+    }
 }

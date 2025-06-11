@@ -20,7 +20,10 @@ import java.util.function.Function;
 public class JwtService {
 
     @Value("${jwt.secret}")
-    public String SECRET_KEY;
+    private String SECRET_KEY;
+
+    @Value("${verification.token.expiration}")
+    private int expiration;
 
     private Claims extractAllClaims(String token) throws ExpiredJwtException {
         return Jwts
@@ -52,7 +55,7 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * expiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

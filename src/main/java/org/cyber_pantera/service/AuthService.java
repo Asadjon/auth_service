@@ -10,6 +10,7 @@ import org.cyber_pantera.exception.EmailConfirmationException;
 import org.cyber_pantera.exception.InvalidCredentialsException;
 import org.cyber_pantera.mailing.AccountVerificationEmailContext;
 import org.cyber_pantera.mailing.EmailService;
+import org.cyber_pantera.mailing.ForgotPasswordEmailContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -102,5 +103,34 @@ public class AuthService {
                 user.getEmail(),
                 user.getRole()
         );
+    }
+
+    public String forgotPassword(ForgotPasswordRequest request) {
+        var user = userService.getUserByEmail(request.getEmail());
+
+        if (!user.isEnabled())
+            throw new EmailConfirmationException("Email not confirmed");
+
+        VerificationToken verificationToken = verificationTokenService.createToken(user);
+        ForgotPasswordEmailContext context = new ForgotPasswordEmailContext();
+        context.init(user);
+        context.setToken(verificationToken.getToken());
+        context.buildVerificationUrl(baseUrl, verificationToken.getToken());
+
+        emailService.sendMail(context);
+
+        return "Password reset link sent to your email";
+    }
+
+    public String resetPassword(ResetPasswordRequest request) {
+        User user = verificationTokenService.checkToken(request.getToken());
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword()))
+            throw new RuntimeException("Passwords do not match");
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userService.update(user);
+
+        return "Password successfully reset";
     }
 }
