@@ -1,6 +1,5 @@
 package org.cyber_pantera.service;
 
-import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,18 +9,22 @@ import org.cyber_pantera.dto.RegisterRequest;
 import org.cyber_pantera.dto.ResendVerificationRequest;
 import org.cyber_pantera.entity.User;
 import org.cyber_pantera.entity.VerificationToken;
+import org.cyber_pantera.exception.EmailConfirmationException;
+import org.cyber_pantera.exception.InvalidCredentialsException;
 import org.cyber_pantera.mailing.AccountVerificationEmailContext;
 import org.cyber_pantera.mailing.EmailService;
-import org.cyber_pantera.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final UserRepository userRepo;
+    private final UserService userService;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenService verificationTokenService;
@@ -32,10 +35,6 @@ public class AuthService {
 
     @Transactional
     public String register(RegisterRequest request) {
-
-        if (userRepo.findByEmail(request.getEmail()).isPresent())
-            throw new RuntimeException("Email already registered");
-
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -45,29 +44,28 @@ public class AuthService {
                 .enabled(false)
                 .build();
 
-        userRepo.save(user);
+        userService.addNewUser(user);
 
         sendConfirmationEmail(user);
 
-        return "Registration successful. Please check your email to confirm.";
+        return "Registration successful. Please check your email to confirm";
     }
 
     public String confirmToken(String token) {
         User user = verificationTokenService.checkToken(token);
         user.setEnabled(true);
-        userRepo.save(user);
-        return "Email confirmed successfully.";
+        userService.update(user);
+        return "Email confirmed successfully";
     }
 
     public AuthResponse login(AuthRequest request) {
-        User user = userRepo.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userService.getUserByEmail(request.getEmail());
 
         if (!user.isEnabled())
-            throw new RuntimeException("Email not confirmed");
+            throw new EmailConfirmationException("Email not confirmed");
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
-            throw new RuntimeException("Invalid credentials");
+            throw new InvalidCredentialsException(new HashSet<>(List.of("Incorrect password")));
 
         String token = jwtService.generateToken(user);
         return new AuthResponse(token, user.getEmail(), user.getRole());
@@ -80,20 +78,14 @@ public class AuthService {
         context.setToken(verificationToken.getToken());
         context.buildVerificationUrl(baseUrl, verificationToken.getToken());
 
-        try {
-            emailService.sendMail(context);
-        } catch (MessagingException e) {
-            log.error("Error sending email:{}", e.getMessage());
-            throw new RuntimeException("Email not sent", e);
-        }
+        emailService.sendMail(context);
     }
 
     public String resendConfirmationEmail(ResendVerificationRequest request) {
-        User user = userRepo.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userService.getUserByEmail(request.getEmail());
 
         if (user.isEnabled())
-            throw new RuntimeException("Email already registered");
+            throw new EmailConfirmationException("Email already verified");
 
         sendConfirmationEmail(user);
 

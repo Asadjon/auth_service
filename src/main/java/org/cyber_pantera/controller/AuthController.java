@@ -1,5 +1,6 @@
 package org.cyber_pantera.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.cyber_pantera.dto.AuthRequest;
 import org.cyber_pantera.dto.AuthResponse;
@@ -17,7 +18,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
     }
 
@@ -27,12 +28,12 @@ public class AuthController {
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<String> resend(@RequestBody ResendVerificationRequest request) {
+    public ResponseEntity<String> resend(@Valid @RequestBody ResendVerificationRequest request) {
         return ResponseEntity.ok(authService.resendConfirmationEmail(request));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
 }
