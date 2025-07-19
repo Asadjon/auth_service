@@ -46,17 +46,6 @@ public class AuthExceptionHandler {
                 .body(e.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationErrors(MethodArgumentNotValidException e) {
-        StringBuilder errors = new StringBuilder();
-        e.getBindingResult()
-                .getFieldErrors()
-                .forEach(error ->
-                errors.append(error.getDefaultMessage()));
-
-        return new ResponseEntity<>(errors.toString(), HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(EmailConfirmationException.class)
     public ResponseEntity<?> emailNotSent(EmailConfirmationException e) {
         return ResponseEntity

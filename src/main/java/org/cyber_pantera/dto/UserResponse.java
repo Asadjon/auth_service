@@ -6,7 +6,8 @@ import org.cyber_pantera.entity.Role;
 
 @Data
 @AllArgsConstructor
-public class ValidationTokenResponse {
+public class UserResponse {
+    private long id;
     private String firstName;
     private String lastName;
     private String email;

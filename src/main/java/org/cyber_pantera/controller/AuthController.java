@@ -35,8 +35,13 @@ public class AuthController {
     }
 
     @GetMapping("/validate")
-    public ResponseEntity<ValidationTokenResponse> validateToken(@RequestParam("token") String jwtToken) {
+    public ResponseEntity<UserResponse> validateToken(@RequestParam("token") String jwtToken) {
         return ResponseEntity.ok(authService.validateToken(jwtToken));
+    }
+
+    @GetMapping("/validate/{userId}")
+    public ResponseEntity<UserResponse> validateUser(@PathVariable long userId) {
+        return ResponseEntity.ok(authService.validateUser(userId));
     }
 
     @PostMapping("/forgot-password")

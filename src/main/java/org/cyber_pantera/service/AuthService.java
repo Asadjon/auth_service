@@ -5,15 +5,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cyber_pantera.dto.*;
 import org.cyber_pantera.entity.User;
-import org.cyber_pantera.entity.VerificationToken;
 import org.cyber_pantera.exception.EmailConfirmationException;
 import org.cyber_pantera.exception.InvalidCredentialsException;
+import org.cyber_pantera.exception.UserNotFoundException;
 import org.cyber_pantera.mailing.AccountVerificationEmailContext;
 import org.cyber_pantera.mailing.EmailService;
 import org.cyber_pantera.mailing.ForgotPasswordEmailContext;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -27,13 +29,14 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenService verificationTokenService;
     private final EmailService emailService;
+    private final BalanceService balanceService;
 
     @Value("${base.url}")
     private String baseUrl;
 
     @Transactional
     public String register(RegisterRequest request) {
-        User user = User.builder()
+        var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
@@ -50,14 +53,15 @@ public class AuthService {
     }
 
     public String confirmToken(String token) {
-        User user = verificationTokenService.checkToken(token);
+        var user = verificationTokenService.checkToken(token);
         user.setEnabled(true);
         userService.update(user);
+        balanceService.initUserBalance(user);
         return "Email confirmed successfully";
     }
 
     public AuthResponse login(AuthRequest request) {
-        User user = userService.getUserByEmail(request.getEmail());
+        var user = userService.getUserByEmail(request.getEmail());
 
         if (!user.isEnabled())
             throw new EmailConfirmationException("Email not confirmed");
@@ -65,13 +69,13 @@ public class AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
             throw new InvalidCredentialsException(new HashSet<>(List.of("Incorrect password")));
 
-        String token = jwtService.generateToken(user);
+        var token = jwtService.generateToken(user);
         return new AuthResponse(token, user.getEmail(), user.getRole());
     }
 
     private void sendConfirmationEmail(User user) {
-        VerificationToken verificationToken = verificationTokenService.createToken(user);
-        AccountVerificationEmailContext context = new AccountVerificationEmailContext();
+        var verificationToken = verificationTokenService.createToken(user);
+        var context = new AccountVerificationEmailContext();
         context.init(user);
         context.setToken(verificationToken.getToken());
         context.buildVerificationUrl(baseUrl, verificationToken.getToken());
@@ -80,7 +84,7 @@ public class AuthService {
     }
 
     public String resendConfirmationEmail(ResendVerificationRequest request) {
-        User user = userService.getUserByEmail(request.getEmail());
+        var user = userService.getUserByEmail(request.getEmail());
 
         if (user.isEnabled())
             throw new EmailConfirmationException("Email already verified");
@@ -90,19 +94,14 @@ public class AuthService {
         return "Confirmation email has been resent";
     }
 
-    public ValidationTokenResponse validateToken(String jwtToken) {
+    public UserResponse validateToken(String jwtToken) {
         var email = jwtService.extractUsername(jwtToken);
         var user = userService.getUserByEmail(email);
 
         if (!user.isEnabled())
-            throw new EmailConfirmationException("Email not confirmed");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
 
-        return new ValidationTokenResponse(
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.getRole()
-        );
+        return mapToUserResponse(user);
     }
 
     public String forgotPassword(ForgotPasswordRequest request) {
@@ -111,8 +110,8 @@ public class AuthService {
         if (!user.isEnabled())
             throw new EmailConfirmationException("Email not confirmed");
 
-        VerificationToken verificationToken = verificationTokenService.createToken(user);
-        ForgotPasswordEmailContext context = new ForgotPasswordEmailContext();
+        var verificationToken = verificationTokenService.createToken(user);
+        var context = new ForgotPasswordEmailContext();
         context.init(user);
         context.setToken(verificationToken.getToken());
         context.buildVerificationUrl(baseUrl, verificationToken.getToken());
@@ -123,7 +122,7 @@ public class AuthService {
     }
 
     public String resetPassword(ResetPasswordRequest request) {
-        User user = verificationTokenService.checkToken(request.getToken());
+        var user = verificationTokenService.checkToken(request.getToken());
 
         if (!request.getNewPassword().equals(request.getConfirmPassword()))
             throw new RuntimeException("Passwords do not match");
@@ -132,5 +131,24 @@ public class AuthService {
         userService.update(user);
 
         return "Password successfully reset";
+    }
+
+    public UserResponse validateUser(long userId) {
+        var user = userService.getUserById(userId);
+
+        if (!user.isEnabled())
+            throw new UserNotFoundException("User not found");
+
+        return mapToUserResponse(user);
+    }
+
+    private UserResponse mapToUserResponse(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getRole()
+        );
     }
 }

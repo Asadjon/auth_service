@@ -1,0 +1,142 @@
+[
+  {
+    "firstName": "Asadjon",
+    "lastName": "Xusanjonov",
+    "email": "asadjon4929@gmail.com",
+    "password": "Password123",
+    "role": "ADMIN"
+  },
+  {
+    "firstName": "Laylo",
+    "lastName": "Tursunova",
+    "email": "laylo.tursunova@example.com",
+    "password": "SecurePass1",
+    "role": "ADMIN"
+  },
+  {
+    "firstName": "Bekzod",
+    "lastName": "Rakhimov",
+    "email": "bekzod.rakhimov@gmail.com",
+    "password": "Pass12345",
+    "role": "USER"
+  },
+  {
+    "firstName": "Nigora",
+    "lastName": "Yuldasheva",
+    "email": "nigora.yuldasheva@gmail.com",
+    "password": "MyPass789",
+    "role": "USER"
+  },
+  {
+    "firstName": "Sardor",
+    "lastName": "Nazarov",
+    "email": "sardor.nazarov@gmail.com",
+    "password": "Qwerty123",
+    "role": "MANAGER"
+  },
+  {
+    "firstName": "Diyora",
+    "lastName": "Sodiqova",
+    "email": "diyora.sodiqova@gmail.com",
+    "password": "DiyoraPass",
+    "role": "USER"
+  },
+  {
+    "firstName": "Aziz",
+    "lastName": "Ibrohimov",
+    "email": "aziz.ibrohimov@gmail.com",
+    "password": "AzizSecure",
+    "role": "ADMIN"
+  },
+  {
+    "firstName": "Malika",
+    "lastName": "Rahmonova",
+    "email": "malika.rahmonova@gmail.com",
+    "password": "Malika1234",
+    "role": "USER"
+  },
+  {
+    "firstName": "Javlon",
+    "lastName": "Shukurov",
+    "email": "javlon.shukurov@gmail.com",
+    "password": "ShukurovPass",
+    "role": "USER"
+  },
+  {
+    "firstName": "Mohira",
+    "lastName": "Abduvalieva",
+    "email": "mohira.abduvalieva@gmail.com",
+    "password": "Mohira2024",
+    "role": "USER"
+  },
+  {
+    "firstName": "Shahzod",
+    "lastName": "Abdullaev",
+    "email": "shahzod.abdullaev@gmail.com",
+    "password": "Abdullaev456",
+    "role": "USER"
+  },
+  {
+    "firstName": "Zilola",
+    "lastName": "Mamatova",
+    "email": "zilola.mamatova@gmail.com",
+    "password": "Zilola!2023",
+    "role": "MANAGER"
+  },
+  {
+    "firstName": "Bobur",
+    "lastName": "Usmonov",
+    "email": "bobur.usmonov@gmail.com",
+    "password": "Bobur_789",
+    "role": "USER"
+  },
+  {
+    "firstName": "Dilshod",
+    "lastName": "Qodirov",
+    "email": "dilshod.qodirov@gmail.com",
+    "password": "D1lshod@",
+    "role": "ADMIN"
+  },
+  {
+    "firstName": "Ziyoda",
+    "lastName": "Ortikova",
+    "email": "ziyoda.ortikova@gmail.com",
+    "password": "Ziyoda@321",
+    "role": "USER"
+  },
+  {
+    "firstName": "Kamoliddin",
+    "lastName": "Rustamov",
+    "email": "kamoliddin.rustamov@gmail.com",
+    "password": "RustamovPass",
+    "role": "USER"
+  },
+  {
+    "firstName": "Rano",
+    "lastName": "Qurbonova",
+    "email": "rano.qurbonova@gmail.com",
+    "password": "RanoSecure",
+    "role": "USER"
+  },
+  {
+    "firstName": "Mirjalol",
+    "lastName": "Aliyev",
+    "email": "mirjalol.aliyev@gmail.com",
+    "password": "Aliyev456",
+    "role": "MANAGER"
+  },
+  {
+    "firstName": "Feruza",
+    "lastName": "Yusupova",
+    "email": "feruza.yusupova@gmail.com",
+    "password": "Yusupova999",
+    "role": "USER"
+  },
+  {
+    "firstName": "Elyor",
+    "lastName": "Soliev",
+    "email": "elyor.soliev@gmail.com",
+    "password": "SolievStrong",
+    "role": "USER"
+  }
+]

@@ -13,6 +13,11 @@ public class UserService {
 
     private final UserRepository userRepo;
 
+    public User getUserById(long id) {
+        return userRepo.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("id: " + id));
+    }
+
     public User getUserByEmail(String email) {
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
