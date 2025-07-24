@@ -10,9 +10,11 @@ import org.cyber_pantera.service.UserService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 @RequiredArgsConstructor
@@ -26,14 +28,18 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         try (var inputStream = getClass().getResourceAsStream("/users.json")) {
-            if (inputStream == null)
-                throw new FileNotFoundException("users.json not found");
+            if (inputStream != null) {
+                objectMapper.readValue(inputStream, new TypeReference<List<RegisterRequest>>() {
+                        })
+                        .stream()
+                        .map(this::mapToUser)
+                        .map(user -> userService.addNewUser(user)
+                                .thenCompose(balanceService::initUserBalance))
+                        .forEach(CompletableFuture::join);
+                return;
+            }
 
-            var users = objectMapper.readValue(inputStream, new TypeReference<List<RegisterRequest>>() {})
-                    .stream().map(this::mapToUser).toList();
-
-            users.forEach(userService::addNewUser);
-            users.forEach(balanceService::initUserBalance);
+            throw new FileNotFoundException("users.json not found");
         }
     }
 

@@ -1,13 +1,13 @@
 package org.cyber_pantera.service;
 
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.cyber_pantera.exception.EmailNotSentException;
 import org.cyber_pantera.mailing.AbstractEmailContext;
 import org.cyber_pantera.mailing.EmailService;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -21,9 +21,10 @@ public class DefaultEmailService implements EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
+    @Async
     @Override
     public void sendMail(AbstractEmailContext email) {
-        Context context = new Context();
+        var context = new Context();
         context.setVariables(email.getContext());
 
         try {
@@ -34,11 +35,11 @@ public class DefaultEmailService implements EmailService {
     }
 
     private void sendMail(AbstractEmailContext email, Context contentContext) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper messageHelper = new MimeMessageHelper(message,
+        var message = mailSender.createMimeMessage();
+        var messageHelper = new MimeMessageHelper(message,
                 MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                 StandardCharsets.UTF_8.name());
-        String emailContent = templateEngine.process(email.getTemplateLocation(), contentContext);
+        var emailContent = templateEngine.process(email.getTemplateLocation(), contentContext);
 
         messageHelper.setTo(email.getTo());
         messageHelper.setFrom(email.getFrom());

@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.cyber_pantera.service.AuthService;
 
+import java.util.concurrent.CompletableFuture;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -15,42 +17,50 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(authService.register(request));
+    public CompletableFuture<ResponseEntity<String>> register(@Valid @RequestBody RegisterRequest request) {
+        return authService.register(request)
+                .thenApply(ResponseEntity::ok);
     }
 
     @GetMapping("/confirm")
-    public ResponseEntity<String> confirm(@RequestParam String token) {
-        return ResponseEntity.ok(authService.confirmToken(token));
+    public CompletableFuture<ResponseEntity<String>> confirm(@RequestParam String token) {
+        return authService.confirmToken(token)
+                .thenApply(ResponseEntity::ok);
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<String> resend(@Valid @RequestBody ResendVerificationRequest request) {
-        return ResponseEntity.ok(authService.resendConfirmationEmail(request));
+    public CompletableFuture<ResponseEntity<String>> resend(@Valid @RequestBody ResendVerificationRequest request) {
+        return authService.resendConfirmationEmail(request)
+                .thenApply(ResponseEntity::ok);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public CompletableFuture<ResponseEntity<AuthResponse>> login(@Valid @RequestBody AuthRequest request) {
+        return authService.login(request)
+                .thenApply(ResponseEntity::ok);
     }
 
     @GetMapping("/validate")
-    public ResponseEntity<UserResponse> validateToken(@RequestParam("token") String jwtToken) {
-        return ResponseEntity.ok(authService.validateToken(jwtToken));
+    public CompletableFuture<ResponseEntity<UserResponse>> validateToken(@RequestParam("token") String jwtToken) {
+        return authService.validateToken(jwtToken)
+                .thenApply(ResponseEntity::ok);
     }
 
     @GetMapping("/validate/{userId}")
-    public ResponseEntity<UserResponse> validateUser(@PathVariable long userId) {
-        return ResponseEntity.ok(authService.validateUser(userId));
+    public CompletableFuture<ResponseEntity<UserResponse>> validateUser(@PathVariable long userId) {
+        return authService.validateUser(userId)
+                .thenApply(ResponseEntity::ok);
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-        return ResponseEntity.ok(authService.forgotPassword(request));
+    public CompletableFuture<ResponseEntity<String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        return authService.forgotPassword(request)
+                .thenApply(ResponseEntity::ok);
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
-        return ResponseEntity.ok(authService.resetPassword(request));
+    public CompletableFuture<ResponseEntity<String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        return authService.resetPassword(request)
+                .thenApply(ResponseEntity::ok);
     }
 }

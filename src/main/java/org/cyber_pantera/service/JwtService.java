@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +42,14 @@ public class JwtService {
 
     public String extractUsername(String token) {
         return extractClaims(token, Claims::getSubject);
+    }
+
+    public boolean isTokenExpired(final String token) {
+        try {
+            return extractClaims(token, Claims::getExpiration).before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
     public String generateToken(UserDetails userDetails) {

@@ -1,11 +1,17 @@
 package org.cyber_pantera.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.cyber_pantera.entity.User;
 import org.cyber_pantera.exception.EmailAlreadyExistsException;
 import org.cyber_pantera.exception.UserNotFoundException;
 import org.cyber_pantera.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -13,29 +19,49 @@ public class UserService {
 
     private final UserRepository userRepo;
 
-    public User getUserById(long id) {
-        return userRepo.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("id: " + id));
+    @Transactional
+    public CompletableFuture<User> getUserById(long id) {
+
+        return exceptionally(userRepo.findById(id))
+                .thenApply(Optional::ofNullable)
+                .thenApply(userOptional ->
+                        userOptional.orElseThrow(() -> new UserNotFoundException("id: " + id)));
     }
 
-    public User getUserByEmail(String email) {
-        return userRepo.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+    @Transactional
+    public CompletableFuture<User> getUserByEmail(String email) {
+        return exceptionally(userRepo.findByEmail(email))
+                .thenApply(Optional::ofNullable)
+                .thenApply(user ->
+                        user.orElseThrow(() -> new UserNotFoundException(email)));
     }
 
-    public void addNewUser(User user) {
-        if (userRepo.findByEmail(user.getEmail()).isPresent())
-            throw new EmailAlreadyExistsException(user.getEmail());
+    @Transactional
+    public CompletableFuture<User> addNewUser(User newUser) {
+        return exceptionally(userRepo.findByEmail(newUser.getEmail()))
+                .thenApply(user -> {
+                    if (user != null)
+                        throw new EmailAlreadyExistsException(user.getEmail());
 
-        userRepo.save(user);
+                    return userRepo.save(newUser);
+                });
     }
 
-    public void update(User user) {
-        if (userRepo.findByEmail(user.getEmail())
-                .or(() -> userRepo.findById(user.getId()))
-                .isEmpty())
-            throw new UserNotFoundException(user.getEmail());
+    @Transactional
+    public CompletableFuture<User> update(User user) {
+        return CompletableFuture.anyOf(
+                exceptionally(userRepo.findByEmail(user.getEmail())),
+                exceptionally(userRepo.findById(user.getId())))
+                .thenApply(o -> {
+                    if (o instanceof User)
+                        return userRepo.save((User) o);
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
+                });
+    }
 
-        userRepo.save(user);
+    private CompletableFuture<User> exceptionally(CompletableFuture<User> future) {
+        return  future.exceptionally(e -> {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        });
     }
 }

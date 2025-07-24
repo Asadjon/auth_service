@@ -7,7 +7,7 @@ public class AccountVerificationEmailContext extends AbstractEmailContext {
 
     @Override
     public <T> void init(T context) {
-        User user = (User) context;
+        var user = (User) context;
         put("firstName", user.getFirstName());
         setTemplateLocation("mailing/email-verification");
         setSubject("Complete Your Registration");
@@ -20,7 +20,7 @@ public class AccountVerificationEmailContext extends AbstractEmailContext {
     }
 
     public void buildVerificationUrl(final String baseURL, final String token) {
-        final UriComponentsBuilder url = UriComponentsBuilder.fromUriString(baseURL)
+        final var url = UriComponentsBuilder.fromUriString(baseURL)
                 .path("/api/v1/auth/confirm").queryParam("token", token);
 
         put("confirmationURL", url.toUriString());
