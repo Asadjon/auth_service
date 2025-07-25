@@ -28,51 +28,14 @@ This service provides authentication and authorization for the Transaction Manag
 
 The service uses **JWT-based authentication**. After logging in, users receive an access token and a refresh token. All secured requests must include the access token in the header:
 
-```http
+```html
 Authorization: Bearer <access_token>
 ```
 
 ---
 
-## 📦 Clone All Required Repositories
-To run the full Transaction Management System, you'll need to clone each microservice repository into a common workspace folder. You can do it manually or with the following commands:
-
-### 1. Create a project directory
-   ```
-   mkdir transaction-system && cd transaction-system
-   ```
-
-### > 2. Clone all required services
-> * [auth_service](https://github.com/Asadjon/balance_service.git) this repository
-> * [balance_service](https://github.com/Asadjon/balance_service.git)
-> * [transaction_service](https://github.com/Asadjon/transaction_service.git)
-> * [api_gateway](https://github.com/Asadjon/api_gateway.git)
-
----
-
-## 🚀 Running with Docker
-### 1. Create app-network (only once)
-If you haven't created the custom network yet, run:
-```
-docker network create app-network
-```
-
-### 2. Build and start the container
-Inside the directory where your Dockerfile and docker-compose.yml are located (e.g., auth_service), run:
-```
-docker-compose up --build
-```
-
-### 3. Useful Docker commands
-Inspect all containers connected to app-network:
-```docker
-docker network inspect app-network
-```
-
-Stop and remove the container(s):
-```
-docker-compose down
-```
+## ⚙️ Setup Instruction
+> You can view the installation manual in the [transaction-management-system](https://github.com/Asadjon/transaction-management-system/blob/master/README.md) repository.
 
 ---
 
@@ -94,43 +57,44 @@ docker-compose down
 
 ## 📦 Request & Response Body Structures
 
-### 🔐 Register `POST /api/v1/auth/register`
+**🔐 Register** `POST /api/v1/auth/register`
 
-#### Request Body:
+**Request Body:**
 ```json
 {
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john@example.com",
-    "password": "yourPassword123",
-    "role": "USER"
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john@example.com",
+  "password": "yourPassword123",
+  "role": "USER"
 }
 ```
-#### Response: ``` User registered successfully. Please check your email for confirmation. ```
+**Response:** `User registered successfully. Please check your email for confirmation.`
 
-### 📩 Email Confirmation `GET /api/v1/auth/confirm?token=yourToken`
-#### Response: ``` Email confirmed successfully. ```
+**📩 Email Confirmation** `GET /api/v1/auth/confirm?token=yourToken`
 
-### 🔄 Resend Verification Email `POST /api/v1/auth/resend-verification`
+**Response:** ``` Email confirmed successfully. ```
 
-#### Request Body:
+**🔄 Resend Verification Email** `POST /api/v1/auth/resend-verification`
+
+**Request Body:**
 ```json
 {
     "email": "john@example.com"
 }
 ```
-#### Response: ``` Verification email resent successfully.```
+**Response:** `Verification email resent successfully.`
 
-### 🔑 Login `POST /api/v1/auth/login`
+**🔑 Login** `POST /api/v1/auth/login`
 
-#### Request Body:
+**Request Body:**
 ```json
 {
     "email": "john@example.com",
-    "password": "yourPassword123",
+    "password": "yourPassword123"
 }
 ```
-#### Response: 
+**Response:**
 ```json
 {
     "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
@@ -139,8 +103,9 @@ docker-compose down
 } 
 ```
 
-### 🛡️ Validate Token `GET  /api/v1/auth/validate?token=yourAccessToken`
-#### Response: 
+**🛡️ Validate Token** `GET  /api/v1/auth/validate?token=yourAccessToken`
+
+**Response:**
 ```json
 {
     "id": "1",
@@ -151,8 +116,9 @@ docker-compose down
 } 
 ```
 
-### 👤 Validate User by ID `GET  /api/v1/auth/validate/{userId}`
-#### Response: 
+**👤 Validate User by ID** `GET  /api/v1/auth/validate/{userId}`
+
+**Response:**
 ```json
 {
     "id": "1",
@@ -163,19 +129,19 @@ docker-compose down
 } 
 ```
 
-### 🔒 Forgot Password `POST /api/v1/auth/forgot-password`
+**🔒 Forgot Password** `POST /api/v1/auth/forgot-password`
 
-#### Request Body:
+**Request Body:**
 ```json
 {
-    "email": "john@example.com",
+    "email": "john@example.com"
 }
 ```
-#### Response: ``` Password reset link has been sent to your email. ```
+**Response:** `Password reset link has been sent to your email.`
 
-### 🔁 Reset Password `POST /api/v1/auth/reset-password`
+**🔁 Reset Password** `POST /api/v1/auth/reset-password`
 
-#### Request Body:
+**Request Body:**
 ```json
 {
     "token": "eyJhbGciOiJIUzI1NiJ9...",
@@ -183,4 +149,4 @@ docker-compose down
     "confirmPassword": "yourNewPassword123"
 }
 ```
-#### Response: ``` Password successfully reset ```
+**Response:** ``` Password successfully reset ```
