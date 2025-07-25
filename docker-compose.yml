@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+
+  auth_db:
+    image: postgres:15
+    restart: always
+    container_name: auth-postgres
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 4929
+    ports:
+      - "5434:5432"
+    networks:
+      - network_mode
+
+  auth_service:
+    image: auth-service
+    container_name: auth-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - auth_db
+    expose:
+      - "8081"
+    networks:
+      - network_mode
+    env_file:
+      - ./.env
+
+networks:
+  network_mode:
+    name: app-network
+    external: true
